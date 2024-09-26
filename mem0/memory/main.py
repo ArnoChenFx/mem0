@@ -141,8 +141,13 @@ class Memory(MemoryBase):
             response_format={"type": "json_object"},
         )
 
+        def try_fix_json_str(json_str):
+            json_begin = json_str.find("{")
+            json_end = json_str.rfind("}")
+            return json_str[json_begin : json_end + 1]
+
         try:
-            new_retrieved_facts = json.loads(response)["facts"]
+            new_retrieved_facts = json.loads(try_fix_json_str(response))["facts"]
         except Exception as e:
             logging.error(f"Error in new_retrieved_facts: {e}")
             new_retrieved_facts = []
@@ -167,7 +172,8 @@ class Memory(MemoryBase):
             messages=[{"role": "user", "content": function_calling_prompt}],
             response_format={"type": "json_object"},
         )
-        new_memories_with_actions = json.loads(new_memories_with_actions)
+        
+        new_memories_with_actions = json.loads(try_fix_json_str(new_memories_with_actions))
 
         returned_memories = []
         try:
